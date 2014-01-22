@@ -5,11 +5,11 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/srv/buildbot/master/twistd.pid
-WorkingDirectory=/srv/buildbot
-ExecStart=/usr/bin/buildbot start master
-ExecReload=/usr/bin/buildbot reconfig master
-ExecStop=/usr/bin/buildbot stop master
+PIDFile=/var/lib/buildbot/twistd.pid
+WorkingDirectory=/var/lib/buildbot
+ExecStart=/usr/bin/buildbot start
+ExecReload=/usr/bin/buildbot reconfig
+ExecStop=/usr/bin/buildbot stop
 Restart=always
 User=buildbot
 

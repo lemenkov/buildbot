@@ -5,11 +5,11 @@ After=network.target
 
 [Service]
 Type=forking
-PIDFile=/srv/buildslave/linux-slave/twistd.pid
-WorkingDirectory=/srv/buildslave
-ExecStart=/usr/bin/buildslave start linux-slave
-ExecReload=/usr/bin/buildslave restart linux-slave
-ExecStop=/usr/bin/buildslave stop linux-slave
+PIDFile=/var/lib/buildslave/twistd.pid
+WorkingDirectory=/var/lib/buildslave
+ExecStart=/usr/bin/buildslave start
+ExecReload=/usr/bin/buildslave restart
+ExecStop=/usr/bin/buildslave stop
 Restart=always
 User=buildslave
 
