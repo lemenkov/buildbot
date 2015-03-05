@@ -58,51 +58,71 @@ def process_change(payload, user, repo, repo_url, project, codebase=None):
     newrev = payload['after']
     refname = payload['ref']
 
-    # We only care about regular heads, i.e. branches
-    match = re.match(r"^refs\/heads\/(.+)$", refname)
+    # Identify the change as a branch, tag or other, and process it
+    match = re.match(r"^refs\/(heads|tags)\/(.+)$", refname)
     if not match:
-        log.msg("Ignoring refname `%s': Not a branch" % refname)
+        log.msg("Ignoring refname `%s': Not a branch or tag" % refname)
     else:
-        branch = match.group(1)
-        if re.match(r"^0*$", newrev):
-            log.msg("Branch `%s' deleted, ignoring" % branch)
-        else:
-            for commit in payload['commits']:
-                if 'distinct' in commit and not commit['distinct']:
-                    log.msg(
-                        'Commit `%s` is a non-distinct commit, ignoring...' % (
-                            commit['id'])
-                    )
-                    continue
+        if match.group(1) == 'heads':
+                branch = match.group(2)
+                if re.match(r"^0*$", newrev):
+                    log.msg("Branch `%s' deleted, ignoring" % branch)
+                else:
+                    for commit in payload['commits']:
+                        if 'distinct' in commit and not commit['distinct']:
+                            log.msg(
+                                'Commit `%s` is a non-distinct commit, ignoring...' % (
+                                    commit['id'])
+                            )
+                            continue
 
-                files = []
-                if 'added' in commit:
-                    files.extend(commit['added'])
-                if 'modified' in commit:
-                    files.extend(commit['modified'])
-                if 'removed' in commit:
-                    files.extend(commit['removed'])
-                when_timestamp = dateparse(commit['timestamp'])
+                        files = []
+                        if 'added' in commit:
+                            files.extend(commit['added'])
+                        if 'modified' in commit:
+                            files.extend(commit['modified'])
+                        if 'removed' in commit:
+                            files.extend(commit['removed'])
+                        when_timestamp = dateparse(commit['timestamp'])
 
-                log.msg("New revision: %s" % commit['id'][:8])
+                        log.msg("New revision: %s" % commit['id'][:8])
 
-                change = {
-                    'author': '%s <%s>' % (
-                        commit['author']['name'], commit['author']['email']
-                    ),
-                    'files': files,
-                    'comments': commit['message'],
-                    'revision': commit['id'],
-                    'when_timestamp': when_timestamp,
-                    'branch': branch,
-                    'revlink': commit['url'],
-                    'repository': repo_url,
-                    'project': project
-                }
+                        change = {
+                            'author': '%s <%s>' % (
+                                commit['author']['name'], commit['author']['email']
+                            ),
+                            'files': files,
+                            'comments': commit['message'],
+                            'revision': commit['id'],
+                            'when_timestamp': when_timestamp,
+                            'branch': branch,
+                            'revlink': commit['url'],
+                            'repository': repo_url,
+                            'project': project
+                        }
 
-                if codebase is not None:
-                    change['codebase'] = codebase
+                        if codebase is not None:
+                            change['codebase'] = codebase
 
-                changes.append(change)
+                        changes.append(change)
+        elif match.group(1) == 'tags':
+                tag = match.group(2)
+                if re.match(r"^0*$", newrev):
+                    log.msg("Tag `%s' deleted, ignoring" % tag)
+                else:
+                    # FIXME
+                    change = {
+                        'author': 'BuildBot <buildbot@localhost>',
+                        'files': [],
+                        'comments': 'tag %s' % match.group(2),
+                        'revision': newrev,
+                        'branch': match.group(2),
+                        'repository': repo_url,
+                        'project': project
+                    }
+                    if codebase is not None:
+                        change['codebase'] = codebase
+
+                    changes.append(change)
 
     return changes
