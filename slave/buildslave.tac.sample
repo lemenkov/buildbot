@@ -33,7 +33,7 @@ slavename = 'buildslave0'
 passwd = 'buildslavepass'
 keepalive = 600
 usepty = 0
-umask = None
+umask = 022
 maxdelay = 300
 allow_shutdown = None
 
