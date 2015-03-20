@@ -5,6 +5,7 @@ After=network.target
 
 [Service]
 Type=forking
+Environment=PATH=/usr/bin:/usr/sbin
 PIDFile=/var/lib/buildslave/twistd.pid
 WorkingDirectory=/var/lib/buildslave
 ExecStart=/usr/bin/buildslave start
